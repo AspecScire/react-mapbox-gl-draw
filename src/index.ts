@@ -2,6 +2,7 @@ import * as MapboxDraw from '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw';
 import { Control } from 'mapbox-gl';
 import * as PropTypes from 'prop-types';
 import * as React from 'react';
+import { withMap } from 'react-mapbox-gl';
 
 const noop = () => {
   /* do nothing */
@@ -37,13 +38,10 @@ interface Props {
   touchBuffer: number;
   touchEnabled: boolean;
   styles: object[];
+  map: any;
 }
 
-export default class DrawControl extends React.Component<Props> {
-  static contextTypes = {
-    map: PropTypes.object.isRequired
-  };
-
+class DrawControl extends React.Component<Props> {
   static defaultProps = {
     onDrawActionable: noop,
     onDrawCombine: noop,
@@ -61,7 +59,6 @@ export default class DrawControl extends React.Component<Props> {
 
   componentWillMount () {
     const {
-      modes,
       onDrawActionable,
       onDrawCombine,
       onDrawCreate,
@@ -71,14 +68,17 @@ export default class DrawControl extends React.Component<Props> {
       onDrawSelectionChange,
       onDrawUncombine,
       onDrawUpdate,
-      position
+      position,
     } = this.props;
 
-    // tslint:disable-next-line
-    const { map } = this.context;
+    const {
+      modes,
+      map,
+      ...rest
+    } = this.props;
 
     this.draw = new MapboxDraw({
-      ...this.props,
+      ...rest,
       modes: {
         ...MapboxDraw.modes,
         ...modes
@@ -100,7 +100,7 @@ export default class DrawControl extends React.Component<Props> {
 
   componentWillUnmount () {
     // tslint:disable-next-line
-    const { map } = this.context;
+    const { map } = this.props;
     if (!map || !map.getStyle()) {
       return;
     }
@@ -111,3 +111,5 @@ export default class DrawControl extends React.Component<Props> {
     return null;
   }
 }
+
+export default withMap(DrawControl);
